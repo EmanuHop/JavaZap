@@ -3,6 +3,8 @@ package trabalhoJavaSocket;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
+
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class Escuta implements Runnable{
@@ -20,7 +22,10 @@ public class Escuta implements Runnable{
 		try {
 			s = new Scanner(this.client.getInputStream());
 			while(s.hasNextLine()) {
-				chat.append("JavaAmigo: "+s.nextLine()+"\n");
+				String str = s.nextLine();
+				chat.append("JavaAmigo: "+str+"\n");
+				//comando para descer automaticamente a tela ao receber mensagem
+				chat.setCaretPosition(chat.getText().length());
 			}
 			s.close();
 			client.close();

@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -18,6 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -29,6 +32,7 @@ public class JavaZap {
 	private JTextField txtIp;
 	private JTextField mensagem;
 	private JTextArea chat;
+	private JScrollPane scrollChat;
 	
 	private int id;
 	private Socket client;
@@ -190,9 +194,11 @@ public class JavaZap {
 						clientServer.close();
 						client.close();
 					}
-					client.close();
-					server.close();
-					clientServer.close();
+					else {
+						client.close();
+						server.close();
+						clientServer.close();
+					}
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				} finally {
@@ -212,15 +218,17 @@ public class JavaZap {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				String str = mensagem.getText();
-				chat.append("You: "+str+"\n");
-				mensagem.setText("");
-				try {
-					PrintStream out;
-					out = new PrintStream(client.getOutputStream());
-					out.println(str);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+		    	if(!str.isEmpty()) {
+		    		chat.append("You: "+str+"\n");
+		    		mensagem.setText("");
+		    		try {
+		    			PrintStream out;
+		    			out = new PrintStream(client.getOutputStream());
+		    			out.println(str);
+		    		} catch (IOException e1) {
+		    			e1.printStackTrace();
+		    		}
+		    	}
 			}
 		});
 		//caixa Enviar mensagem
@@ -229,15 +237,32 @@ public class JavaZap {
 		mensagem.setBounds(39, 239, 286, 25);
 		frame.getContentPane().add(mensagem);
 		mensagem.setColumns(10);
-		
-		//caixa de dialogo
+		mensagem.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+			    if (e.getKeyCode()==KeyEvent.VK_ENTER){
+			    	String str = mensagem.getText();
+			    	if(!str.isEmpty()) {
+			    		chat.append("You: "+str+"\n");
+			    		mensagem.setText("");
+			    		try {
+			    			PrintStream out;
+			    			out = new PrintStream(client.getOutputStream());
+			    			out.println(str);
+			    		} catch (IOException e1) {
+			    			e1.printStackTrace();
+			    		}
+			    	}
+			    }
+			}
+		});
+
 		chat = new JTextArea();
-		chat.setBackground(new Color(211, 215, 207));
-		chat.setBounds(39, 12, 352, 215);
-		frame.getContentPane().add(chat);
 		chat.setEditable(false);
-		JProgressBar progressBar = new JProgressBar();
-		progressBar.setBounds(101, 159, 148, 14);
-		frame.getContentPane().add(progressBar);
+		scrollChat = new JScrollPane(chat);
+		scrollChat.setForeground(new Color(128, 128, 64));
+		scrollChat.setBackground(new Color(211, 215, 207));
+		scrollChat.setBounds(39, 12, 352, 215);
+		frame.getContentPane().add(scrollChat);
 	}
 }
