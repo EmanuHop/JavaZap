@@ -12,14 +12,17 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.BindException;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
+
 import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -33,7 +36,6 @@ public class JavaZap {
 	private JTextField mensagem;
 	private JTextArea chat;
 	private JScrollPane scrollChat;
-	
 	private int id;
 	private Socket client;
 	private Socket clientServer;
@@ -111,6 +113,7 @@ public class JavaZap {
 					frmJavazap.setVisible(false);
 				} catch (IOException er) {
 					er.printStackTrace();
+					JOptionPane.showMessageDialog(frmJavazap, "Servidor ja esta aberto", "Server", 0);
 				} catch (InterruptedException er) {
 					er.printStackTrace();
 				}
@@ -161,8 +164,13 @@ public class JavaZap {
 					frame.setVisible(true);
 					chat.setVisible(true);
 					frmJavazap.setVisible(false);
-				}catch (IOException e1) {
+				}catch (ConnectException e1) {
 					e1.printStackTrace();
+					JOptionPane.showMessageDialog(frmJavazap, "Conexao recusada! Nenhum servidor encotrado", "Cliente", 0);
+				}catch (BindException e2) {
+					JOptionPane.showMessageDialog(frmJavazap, "Ja existe um cliente conectado ao servidor", "Cliente", 0);
+				} catch (IOException e2) {
+					e2.printStackTrace();
 				}
 			}
 		});
@@ -187,7 +195,6 @@ public class JavaZap {
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				System.out.println("teste");
 				try {
 					if(id==0) {
 						server.close();
@@ -217,7 +224,7 @@ public class JavaZap {
 		enviar.addMouseListener(new MouseAdapter(){
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				String str = mensagem.getText();
+				String str = mensagem.getText().trim();
 		    	if(!str.isEmpty()) {
 		    		chat.append("You: "+str+"\n");
 		    		mensagem.setText("");
@@ -241,7 +248,7 @@ public class JavaZap {
 			@Override
 			public void keyPressed(KeyEvent e) {
 			    if (e.getKeyCode()==KeyEvent.VK_ENTER){
-			    	String str = mensagem.getText();
+			    	String str = mensagem.getText().trim();
 			    	if(!str.isEmpty()) {
 			    		chat.append("You: "+str+"\n");
 			    		mensagem.setText("");
@@ -256,7 +263,9 @@ public class JavaZap {
 			    }
 			}
 		});
-
+		/*
+		 * Area do chat
+		 */
 		chat = new JTextArea();
 		chat.setEditable(false);
 		scrollChat = new JScrollPane(chat);
